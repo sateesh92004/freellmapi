@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { getDb } from '../db/index.js';
+import { isPrivacyMode } from '../lib/privacy.js';
 
 // Playground conversation storage, mounted under /api/conversations behind the
 // dashboard session gate like every other admin route. The Playground page is
@@ -195,6 +196,11 @@ conversationsRouter.get('/:id', (req: Request, res: Response) => {
 });
 
 conversationsRouter.post('/', (req: Request, res: Response) => {
+  // PRIVACY_MODE=1: the dashboard playground must not persist transcripts.
+  if (isPrivacyMode()) {
+    res.status(403).json({ error: { message: 'Conversation persistence is disabled (PRIVACY_MODE=1)' } });
+    return;
+  }
   const parsed = createSchema.safeParse(req.body ?? {});
   if (!parsed.success) {
     res.status(400).json({ error: { message: 'Invalid conversation' } });
@@ -220,6 +226,11 @@ conversationsRouter.post('/', (req: Request, res: Response) => {
 });
 
 conversationsRouter.put('/:id', (req: Request, res: Response) => {
+  // PRIVACY_MODE=1: the dashboard playground must not persist transcripts.
+  if (isPrivacyMode()) {
+    res.status(403).json({ error: { message: 'Conversation persistence is disabled (PRIVACY_MODE=1)' } });
+    return;
+  }
   const id = parseId(req, res);
   if (id === null) return;
   const parsed = updateSchema.safeParse(req.body ?? {});

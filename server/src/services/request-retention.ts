@@ -1,7 +1,12 @@
 import { getDb } from '../db/index.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_RETENTION_DAYS = 90;
+// Raw request rows are metadata only (model, tokens, latency — never prompt
+// or response bodies), but 90 days of metadata is still a lot of operational
+// history to keep by default. 30 days is enough for quota debugging while
+// limiting what a stolen DB reveals. Operators who need longer can raise it
+// with REQUEST_ANALYTICS_RETENTION_DAYS.
+const DEFAULT_RETENTION_DAYS = 30;
 const DEFAULT_MAX_ROWS = 100_000;
 const PRUNE_INTERVAL_MS = 60_000;
 // Hourly aggregate table. Pruned once a day on the same 60s tick; bounded at

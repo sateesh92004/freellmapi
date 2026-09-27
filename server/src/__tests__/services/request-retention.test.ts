@@ -41,11 +41,11 @@ describe('request analytics retention', () => {
   it('uses conservative defaults when env values are absent or invalid', () => {
     delete process.env.REQUEST_ANALYTICS_RETENTION_DAYS;
     delete process.env.REQUEST_ANALYTICS_MAX_ROWS;
-    expect(getRequestAnalyticsRetentionConfig()).toEqual({ retentionDays: 90, maxRows: 100000 });
+    expect(getRequestAnalyticsRetentionConfig()).toEqual({ retentionDays: 30, maxRows: 100000 });
 
     process.env.REQUEST_ANALYTICS_RETENTION_DAYS = 'bad';
     process.env.REQUEST_ANALYTICS_MAX_ROWS = '-1';
-    expect(getRequestAnalyticsRetentionConfig()).toEqual({ retentionDays: 90, maxRows: 100000 });
+    expect(getRequestAnalyticsRetentionConfig()).toEqual({ retentionDays: 30, maxRows: 100000 });
   });
 
   it('deletes request analytics older than the configured retention window', () => {

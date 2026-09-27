@@ -4,8 +4,19 @@ const REDACTIONS: Array<[RegExp, string]> = [
   [/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, 'Bearer [redacted]'],
   // Quote-tolerant so JSON bodies like {"api_key": "..."} are caught too.
   [/(["']?)\b(api[_-]?key|access[_-]?token|token|secret|authorization)\b\1(\s*[:=]\s*)(["']?)[^"',\s}\]]+/gi, '$1$2$1$3$4[redacted]'],
-  [/\bsk-[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],
-  [/\bgsk_[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],
+  [/\bsk-[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],           // OpenAI-style
+  [/\bsk_[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],            // Pollinations
+  [/\bgsk_[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],           // Groq
+  [/\bcsk-[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],           // Cerebras
+  [/\bnvapi-[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],         // NVIDIA
+  [/\bhf_[A-Za-z0-9]{16,}\b/g, '[redacted-key]'],              // HuggingFace
+  [/\bcfut_[A-Za-z0-9]{16,}\b/g, '[redacted-key]'],           // Cloudflare
+  [/\bvck_[A-Za-z0-9]{16,}\b/g, '[redacted-key]'],             // Vercel
+  [/\bcpk_[A-Za-z0-9.]{16,}\b/g, '[redacted-key]'],           // Chutes
+  [/\balv2_[A-Za-z0-9]{16,}\b/g, '[redacted-key]'],           // Aion Labs
+  [/\brqsty-sk-[A-Za-z0-9_\-/+=]{16,}\b/g, '[redacted-key]'], // Requesty
+  [/\bgithub_pat_[A-Za-z0-9_]{20,}\b/g, '[redacted-key]'],    // GitHub fine-grained
+  [/\bghp_[A-Za-z0-9]{20,}\b/g, '[redacted-key]'],            // GitHub classic
   [/\bfreellmapi-[A-Za-z0-9_-]{8,}\b/g, '[redacted-key]'],
   [/\bAIza[0-9A-Za-z_-]{20,}\b/g, '[redacted-key]'],
   [/\b[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/g, '[redacted-token]'],

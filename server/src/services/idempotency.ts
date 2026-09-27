@@ -25,6 +25,7 @@
 
 import crypto from 'crypto';
 import { getDb } from '../db/index.js';
+import { isPrivacyMode } from '../lib/privacy.js';
 import type { ChatMessage } from '@freellmapi/shared/types.js';
 
 // ── Config (read per call so tests can flip it live) ──
@@ -93,6 +94,9 @@ export function lookupIdempotencyReplay(
   fingerprint: string,
   now = Date.now(),
 ): IdempotencyClaimResult {
+  // PRIVACY_MODE=1: replays would serve persisted response bodies, so treat
+  // every lookup as a miss (the request just runs normally).
+  if (isPrivacyMode()) return { kind: 'miss' };
   try {
     const db = getDb();
     const row = db.prepare(
@@ -130,6 +134,8 @@ export function storeIdempotencyResult(
   executionId?: string,
   now = Date.now(),
 ): void {
+  // PRIVACY_MODE=1: never persist response bodies.
+  if (isPrivacyMode()) return;
   try {
     const db = getDb();
     const ttl = idempotencyTtlMs();
