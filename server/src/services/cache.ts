@@ -30,6 +30,7 @@
 
 import crypto from 'crypto';
 import { getSetting } from '../db/index.js';
+import { isPrivacyMode } from '../lib/privacy.js';
 import type { ChatMessage } from '@freellmapi/shared/types.js';
 
 // ── Config (read on each call so tests and the dashboard can toggle live) ──
@@ -66,6 +67,8 @@ export const CACHE_ENABLED_SETTING = 'response_cache_enabled';
  * the RESPONSE_CACHE env var, then off.
  */
 export function isCacheEnabled(): boolean {
+  // PRIVACY_MODE=1: completions must not linger in the in-memory cache either.
+  if (isPrivacyMode()) return false;
   const stored = readSetting(CACHE_ENABLED_SETTING);
   if (stored !== undefined && stored.trim() !== '') {
     return /^(1|true|on|yes)$/i.test(stored.trim());

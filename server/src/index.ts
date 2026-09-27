@@ -30,6 +30,23 @@ async function main() {
   const { port: PORT, host: HOST } = config;
   warnOnEnvDrift();
 
+  // A non-loopback bind is an explicit opt-in (HOST=0.0.0.0 or ::), but the
+  // consequence is easy to miss: anyone on the network can then call the
+  // admin API and spend the stored provider keys. Say it loudly at boot.
+  const hostLower = HOST.toLowerCase();
+  const isLoopback = hostLower === 'localhost' || hostLower === '::1' || hostLower === '127.0.0.1' || /^127\./.test(hostLower);
+  if (!isLoopback) {
+    console.warn(
+      '\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n' +
+      `!! [server] SECURITY WARNING: binding to ${HOST} — every host on this  !!\n` +
+      '!! [server] network can reach the dashboard admin API and spend your    !!\n' +
+      '!! [server] stored provider keys. Only do this on a trusted network,    !!\n' +
+      '!! [server] ideally behind a reverse proxy with TLS + auth. The default !!\n' +
+      '!! [server] bind (HOST unset) is loopback-only.                          !!\n' +
+      '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n',
+    );
+  }
+
   // Install first so a late provider socket reset (undici HTTP/2 error with no
   // listener) can't take the proxy down. Genuine bugs still exit 1.
   installProcessSafetyNet();

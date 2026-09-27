@@ -1,6 +1,7 @@
 import { getDb } from '../db/index.js';
 import { pruneRequestAnalytics } from '../services/request-retention.js';
 import { getClientContext } from './client-context.js';
+import { isPrivacyMode } from './privacy.js';
 import { noteRequestRowId, type RequestTrace } from './attempt-trace.js';
 
 type LogTx = ReturnType<typeof getDb>;
@@ -68,6 +69,9 @@ export function logRequest(
   // nothing usable, so the column stays empty in the healthy case.
   servedModel: string | null = null,
 ) {
+  // PRIVACY_MODE=1: no request history, aggregates, or client-IP rows are
+  // persisted. Analytics endpoints then report empty sets.
+  if (isPrivacyMode()) return;
   try {
     const db = getDb();
     // Caller identity from the request-scoped context (set by the express
@@ -125,6 +129,7 @@ export function logRequest(
 // now only the loop-top stop paths, whose failed attempts each wrote their own
 // row already.
 export function persistRequestAttempts(trace: RequestTrace): void {
+  if (isPrivacyMode()) return;
   if (trace.records.length === 0 || trace.lastRequestRowId == null) return;
   try {
     const db = getDb();
